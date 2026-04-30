@@ -34,5 +34,9 @@ namespace ShopNest.DAL.Repositories.Implementations
         {
             _dbSet.Update(entity);
         }
+
+        public async Task<int> CountAsync() => await _dbSet.CountAsync();
+
+        public async Task<bool> ExistsAsync(int id) => await _dbSet.FindAsync(id) != null;
     }
 }

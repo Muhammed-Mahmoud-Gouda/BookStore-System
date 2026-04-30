@@ -21,6 +21,7 @@ namespace ShopNest.DAL.Repositories.Implementations
                 .Include(o => o.Customer)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p.Images)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
         }
@@ -31,6 +32,7 @@ namespace ShopNest.DAL.Repositories.Implementations
                
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
+                        .ThenInclude(p => p.Images)
                 .Where(o => o.CustomerId == customerId)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();

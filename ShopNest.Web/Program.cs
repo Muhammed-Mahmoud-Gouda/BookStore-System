@@ -13,8 +13,11 @@ namespace ShopNest.Web
             builder.Services.AddControllersWithViews();
 
             //DbContext
+
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
             builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                    options.UseSqlServer(connectionString));
 
             builder.Services.AddControllersWithViews();
 

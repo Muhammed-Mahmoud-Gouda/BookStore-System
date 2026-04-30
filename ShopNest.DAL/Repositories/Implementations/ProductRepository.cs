@@ -17,7 +17,6 @@ namespace ShopNest.DAL.Repositories.Implementations
             return await _dbSet
                 .Include(p => p.Category)
                 .Include(p => p.Images)
-                .Where(p => p.IsActive)
                 .ToListAsync();
         }
 
