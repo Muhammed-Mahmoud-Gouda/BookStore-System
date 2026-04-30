@@ -11,4 +11,12 @@
     <ProjectReference Include="..\ShpoNest.Models\ShpoNest.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Helper\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Services\" />
+    <Folder Include="Validators\" />
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
 </Project>
