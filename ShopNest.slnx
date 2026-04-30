@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="ShopNest.BLL/ShopNest.BLL.csproj" />
-  <Project Path="ShopNest.DAL/ShopNest.DAL.csproj" />
-  <Project Path="ShopNest.Web/ShopNest.Web.csproj" />
-  <Project Path="ShpoNest.Models/ShpoNest.Models.csproj" />
-</Solution>

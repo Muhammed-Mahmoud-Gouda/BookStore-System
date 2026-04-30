@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShpoNest.Models\ShpoNest.Models.csproj" />
+    <ProjectReference Include="..\ShpoNest.Models\BookStore.Models.csproj" />
   </ItemGroup>
 
 </Project>

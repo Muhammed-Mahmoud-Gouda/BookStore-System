@@ -7,14 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShopNest.DAL\ShopNest.DAL.csproj" />
-    <ProjectReference Include="..\ShpoNest.Models\ShpoNest.Models.csproj" />
+    <ProjectReference Include="..\ShopNest.DAL\BookStore.DAL.csproj" />
+    <ProjectReference Include="..\ShpoNest.Models\BookStore.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="DTOs\" />
     <Folder Include="Services\" />
-    <Folder Include="Validators\" />
     <Folder Include="Interfaces\" />
   </ItemGroup>
 

@@ -1,0 +1,27 @@
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
+
+namespace ShopNest.BLL.Validators
+{
+    public class AllowedExtensionsAttribute : ValidationAttribute
+    {
+        private readonly string[] _extensions;
+
+        public AllowedExtensionsAttribute(string[] extensions)
+        {
+            _extensions = extensions;
+        }
+
+        protected override ValidationResult? IsValid(object? value, ValidationContext context)
+        {
+            if (value is IFormFile file)
+            {
+                var extension = Path.GetExtension(file.FileName).ToLower();
+                if (!_extensions.Contains(extension))
+                    return new ValidationResult($"Allowed extensions: {string.Join(", ", _extensions)}");
+            }
+
+            return ValidationResult.Success;
+        }
+    }
+}
