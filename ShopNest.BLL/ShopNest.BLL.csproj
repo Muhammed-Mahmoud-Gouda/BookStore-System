@@ -12,11 +12,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helper\" />
     <Folder Include="DTOs\" />
     <Folder Include="Services\" />
     <Folder Include="Validators\" />
     <Folder Include="Interfaces\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
   </ItemGroup>
 
 </Project>

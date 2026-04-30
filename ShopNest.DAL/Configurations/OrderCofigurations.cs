@@ -22,7 +22,7 @@ namespace ShopNest.DAL.Configurations
             builder.Property(o => o.Status)
                 .IsRequired()
                 .HasDefaultValue(OrderStatus.Pending);
-
+                
             builder.Property(o => o.TotalAmount)
                 .IsRequired()
                 .HasPrecision(18, 2);

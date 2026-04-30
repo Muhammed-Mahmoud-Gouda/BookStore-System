@@ -55,7 +55,7 @@ namespace ShopNest.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.Customer", b =>
@@ -101,7 +101,7 @@ namespace ShopNest.DAL.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.CustomerAddress", b =>
@@ -147,7 +147,7 @@ namespace ShopNest.DAL.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("CustomerAddresses");
+                    b.ToTable("CustomerAddresses", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.Order", b =>
@@ -202,7 +202,7 @@ namespace ShopNest.DAL.Migrations
 
                     b.HasIndex("ShippingAddressId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.OrderItem", b =>
@@ -233,7 +233,7 @@ namespace ShopNest.DAL.Migrations
                     b.HasIndex("OrderId", "ProductId")
                         .IsUnique();
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.Product", b =>
@@ -312,7 +312,7 @@ namespace ShopNest.DAL.Migrations
                         .IsUnique()
                         .HasFilter("[ISBN] IS NOT NULL");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.ProductImages", b =>
@@ -350,7 +350,7 @@ namespace ShopNest.DAL.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("ShpoNest.Models.Entities.CustomerAddress", b =>
