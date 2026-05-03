@@ -1,42 +1,65 @@
-﻿using ShopNest.DAL.ApplicationDbContext;
+﻿using Microsoft.Extensions.Logging;
+using ShopNest.DAL.ApplicationDbContext;
 using ShopNest.DAL.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Runtime.CompilerServices;
 
-namespace ShopNest.DAL.Repositories.Implementations
+namespace ShopNest.DAL.Repositories.Implementations;
+
+public class UnitOfWork : IUnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    
+    private readonly AppDbContext _context;
+    private readonly ILogger<UnitOfWork> _logger;
+    
+
+    public ICategoryRepository Categories { get; }
+    public IProductRepository Products { get; }
+    public IProductImageRepository ProductImages { get; }
+    public ICustomerRepository Customers { get; }
+    public ICustomerAddressRepository CustomerAddresses { get; }
+    public IOrderRepository Orders { get; }
+    public IOrderItemRepository OrderItems { get; }
+
+    public UnitOfWork(AppDbContext context, ILogger<UnitOfWork> logger)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+        _logger = logger;
+        
+        Categories = new CategoryRepository(context);
+        Products = new ProductRepository(context);
+        ProductImages = new ProductImageRepository(context);
+        Customers = new CustomerRepository(context);
+        CustomerAddresses = new CustomerAddressRepository(context);
+        Orders = new OrderRepository(context);
+        OrderItems = new OrderItemRepository(context);
+    }
 
-        public ICategoryRepository Categories { get; }
-        public IProductRepository Products { get; }
-        public IProductImageRepository ProductImages { get; }
-        public ICustomerRepository Customers { get; }
-        public ICustomerAddressRepository CustomerAddresses { get; }
-        public IOrderRepository Orders { get; }
-        public IOrderItemRepository OrderItems { get; }
+    public async Task<int> SaveChangesAsync()
+    {
+        // Begin an explicit transaction
+        await using var transaction = await _context.Database.BeginTransactionAsync();
 
-        public UnitOfWork(AppDbContext context)
+        try
         {
-            _context = context;
-            Categories = new CategoryRepository(context);
-            Products = new ProductRepository(context);
-            ProductImages = new ProductImageRepository(context);
-            Customers = new CustomerRepository(context);
-            CustomerAddresses = new CustomerAddressRepository(context);
-            Orders = new OrderRepository(context);
-            OrderItems = new OrderItemRepository(context);
+            // Your pending changes (e.g., _context.Categories.Add(), .Update(), etc.)
+            // Note: Your original line `var tr = _context.Categories=` was incomplete.
+            // Place any entity operations BEFORE SaveChangesAsync() here.
+
+            var result = await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+            return result;
         }
-
-        public async Task<int> SaveChangesAsync()
-            => await _context.SaveChangesAsync();
-
-        public void Dispose()
+        catch
         {
-            _context.Dispose();
-            GC.SuppressFinalize(this);
+            await transaction.RollbackAsync();
+            throw; // Preserves the original stack trace
         }
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
