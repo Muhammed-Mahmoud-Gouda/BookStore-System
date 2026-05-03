@@ -44,5 +44,13 @@ namespace ShopNest.DAL.Repositories.Implementations
             .OrderBy(p => p.Stock)
             .ToListAsync();
         }
+        public async Task<bool> ISBNExistsAsync(string isbn)
+            => await _dbSet.AnyAsync(p => p.ISBN == isbn);
+
+        public async Task<Product?> GetByISBNAsync(string isbn)
+            => await _dbSet
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.ISBN == isbn);
     }
 }

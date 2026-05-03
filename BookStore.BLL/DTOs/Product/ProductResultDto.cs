@@ -12,6 +12,7 @@ namespace ShopNest.BLL.DTOs.Product
         public bool IsActive { get; set; }
         public string CategoryName { get; set; }
         public int CategoryId { get; set; }
+        
 
         // Book Specs
         public string? Author { get; set; }
@@ -24,6 +25,6 @@ namespace ShopNest.BLL.DTOs.Product
         public BookFormat? Format { get; set; }
 
         public string? MainImagePath { get; set; }
-        public List<ProductImageResultDto> ImagePaths { get; set; } = new();
+        public List<ProductImageResultDto> Images { get; set; } = new();
     }
 }

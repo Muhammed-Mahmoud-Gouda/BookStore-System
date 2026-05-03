@@ -11,5 +11,7 @@ namespace ShopNest.DAL.Repositories.Interfaces
         Task<Product?> GetByIdWithImagesAsync(int id);
         Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId);
         Task<IEnumerable<Product>> GetLowStockAsync(int threshold = 10);
+        Task<Product?> GetByISBNAsync(string isbn);
+        Task<bool> ISBNExistsAsync(string isbn);
     }
 }
