@@ -201,22 +201,5 @@ namespace ShopNest.BLL.Services.Implementations
             };
         }
 
-        private static bool isValid(OrderCreateDto orderCreateDto)
-        {
-            if (orderCreateDto.Notes is not null)
-            {
-                StringBuilder builder = new(orderCreateDto.Notes?.Trim());
-
-                if (builder is not null)
-                {
-                    return true;
-                }
-
-            }
-
-            return false;
-        }
-
-
     }
 }
