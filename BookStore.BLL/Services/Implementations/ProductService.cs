@@ -68,126 +68,146 @@ namespace ShopNest.BLL.Services.Implementations
 
         public async Task CreateAsync(ProductCreateDto dto)
         {
-            // Check ISBN Unique
-            if (!string.IsNullOrEmpty(dto.ISBN) && await ISBNExistsAsync(dto.ISBN))
-                throw new Exception($"ISBN {dto.ISBN} already exists");
-
-            var product = new Product
+            await using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                Stock = dto.Stock,
-                CategoryId = dto.CategoryId,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                Author = dto.Author,
-                Publisher = dto.Publisher,
-                ISBN = dto.ISBN,
-                PublicationYear = dto.PublicationYear,
-                Pages = dto.Pages,
-                Language = dto.Language,
-                Edition = dto.Edition,
-                Format = dto.Format,
-            };
+                // Check ISBN Unique
+                if (!string.IsNullOrEmpty(dto.ISBN) && await ISBNExistsAsync(dto.ISBN))
+                    throw new Exception($"ISBN {dto.ISBN} already exists");
 
-            await _unitOfWork.Products.AddAsync(product);
-            await _unitOfWork.SaveChangesAsync();
-
-            // Upload Images
-            if (dto.Images != null && dto.Images.Any())
-            {
-                bool isFirst = true;
-                foreach (var image in dto.Images)
+                var product = new Product
                 {
-                    var fileName = await UploadHelper.UploadFileAsync(FolderName, image);
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    Price = dto.Price,
+                    Stock = dto.Stock,
+                    CategoryId = dto.CategoryId,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    Author = dto.Author,
+                    Publisher = dto.Publisher,
+                    ISBN = dto.ISBN,
+                    PublicationYear = dto.PublicationYear,
+                    Pages = dto.Pages,
+                    Language = dto.Language,
+                    Edition = dto.Edition,
+                    Format = dto.Format,
+                };
 
-                    var productImage = new ProductImages
-                    {
-                        ProductId = product.Id,
-                        ImagePath = fileName,
-                        IsMain = isFirst,
-                        DisplayOrder = dto.Images.IndexOf(image),
-                        CreatedAt = DateTime.UtcNow,
-                    };
-
-                    await _unitOfWork.ProductImages.AddAsync(productImage);
-                    isFirst = false;
-                }
-
+                await _unitOfWork.Products.AddAsync(product);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Upload Images
+                if (dto.Images != null && dto.Images.Any())
+                {
+                    bool isFirst = true;
+                    foreach (var image in dto.Images)
+                    {
+                        var fileName = await UploadHelper.UploadFileAsync(FolderName, image);
+
+                        var productImage = new ProductImages
+                        {
+                            ProductId = product.Id,
+                            ImagePath = fileName,
+                            IsMain = isFirst,
+                            DisplayOrder = dto.Images.IndexOf(image),
+                            CreatedAt = DateTime.UtcNow,
+                        };
+
+                        await _unitOfWork.ProductImages.AddAsync(productImage);
+                        isFirst = false;
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
-       
+
         public async Task UpdateAsync(ProductUpdateDto dto)
         {
-            Product? product = await _unitOfWork.Products.GetByIdWithImagesAsync(dto.Id)
-                ?? throw new Exception($"Product with id {dto.Id} not found");
-
-            
-            if (!string.IsNullOrEmpty(dto.ISBN) &&
-                dto.ISBN != product.ISBN &&
-                await ISBNExistsAsync(dto.ISBN))
-                throw new Exception($"ISBN {dto.ISBN} already exists");
-
-            // Update Fields
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.Price = dto.Price;
-            product.Stock = dto.Stock;
-            product.CategoryId = dto.CategoryId;
-            product.IsActive = dto.IsActive;
-            product.Author = dto.Author;
-            product.Publisher = dto.Publisher;
-            product.ISBN = dto.ISBN;
-            product.PublicationYear = dto.PublicationYear;
-            product.Pages = dto.Pages;
-            product.Language = dto.Language;
-            product.Edition = dto.Edition;
-            product.Format = dto.Format;
-
-            // Remove Selected Images
-            if (dto.RemovedImageIds != null && dto.RemovedImageIds.Any())
+            await using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                foreach (var imageId in dto.RemovedImageIds)
+                Product? product = await _unitOfWork.Products.GetByIdWithImagesAsync(dto.Id)
+               ?? throw new Exception($"Product with id {dto.Id} not found");
+
+
+                if (!string.IsNullOrEmpty(dto.ISBN) &&
+                    dto.ISBN != product.ISBN &&
+                    await ISBNExistsAsync(dto.ISBN))
+                    throw new Exception($"ISBN {dto.ISBN} already exists");
+
+                // Update Fields
+                product.Name = dto.Name;
+                product.Description = dto.Description;
+                product.Price = dto.Price;
+                product.Stock = dto.Stock;
+                product.CategoryId = dto.CategoryId;
+                product.IsActive = dto.IsActive;
+                product.Author = dto.Author;
+                product.Publisher = dto.Publisher;
+                product.ISBN = dto.ISBN;
+                product.PublicationYear = dto.PublicationYear;
+                product.Pages = dto.Pages;
+                product.Language = dto.Language;
+                product.Edition = dto.Edition;
+                product.Format = dto.Format;
+
+                // Remove Selected Images
+                if (dto.RemovedImageIds != null && dto.RemovedImageIds.Any())
                 {
-                    var image = await _unitOfWork.ProductImages.GetByIdAsync(imageId);
-                    if (image != null)
+                    foreach (var imageId in dto.RemovedImageIds)
                     {
-                        UploadHelper.RemoveFile(FolderName, image.ImagePath);
-                        _unitOfWork.ProductImages.Delete(image);
+                        var image = await _unitOfWork.ProductImages.GetByIdAsync(imageId);
+                        if (image != null)
+                        {
+                            UploadHelper.RemoveFile(FolderName, image.ImagePath);
+                            _unitOfWork.ProductImages.Delete(image);
+                        }
                     }
                 }
-            }
 
-            // Upload New Images
-            if (dto.NewImages != null && dto.NewImages.Any())
-            {
-                var existingCount = product.Images?.Count ?? 0;
-                bool isFirst = existingCount == 0;
-
-                foreach (var image in dto.NewImages)
+                // Upload New Images
+                if (dto.NewImages != null && dto.NewImages.Any())
                 {
-                    var fileName = await UploadHelper.UploadFileAsync(FolderName, image);
+                    var existingCount = product.Images?.Count ?? 0;
+                    bool isFirst = existingCount == 0;
 
-                    var productImage = new ProductImages
+                    foreach (var image in dto.NewImages)
                     {
-                        ProductId = product.Id,
-                        ImagePath = fileName,
-                        IsMain = isFirst,
-                        DisplayOrder = existingCount + dto.NewImages.IndexOf(image),
-                        CreatedAt = DateTime.UtcNow,
-                    };
+                        var fileName = await UploadHelper.UploadFileAsync(FolderName, image);
 
-                    await _unitOfWork.ProductImages.AddAsync(productImage);
-                    isFirst = false;
+                        var productImage = new ProductImages
+                        {
+                            ProductId = product.Id,
+                            ImagePath = fileName,
+                            IsMain = isFirst,
+                            DisplayOrder = existingCount + dto.NewImages.IndexOf(image),
+                            CreatedAt = DateTime.UtcNow,
+                        };
+
+                        await _unitOfWork.ProductImages.AddAsync(productImage);
+                        isFirst = false;
+                    }
                 }
-            }
 
-            _unitOfWork.Products.Update(product);
-            await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Products.Update(product);
+                await _unitOfWork.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
-       
+
         public async Task DeleteAsync(int id)
         {
             var product = await _unitOfWork.Products.GetByIdWithImagesAsync(id)

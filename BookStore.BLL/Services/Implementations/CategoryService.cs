@@ -19,7 +19,7 @@ namespace ShopNest.BLL.Services.Implementations
        
         public async Task<IEnumerable<CategoryResultDto>> GetAllAsync()
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var categories = await _unitOfWork.Categories.GetAllWithProductsAsync();
             return categories.Select(c => MapToResultDto(c));
         }
         
