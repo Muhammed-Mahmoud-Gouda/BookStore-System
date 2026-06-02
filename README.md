@@ -202,42 +202,103 @@ Or press **F5** in Visual Studio.
 
 ---
 
-## 📁 Project Structure (Detailed)
+## 📁 Project Structure
 
+### BookStore.Entities
 ```
-BookStore.DAL
-└── Repositories
-    ├── Interfaces
-    │   ├── IGenericRepository.cs
-    │   ├── ICategoryRepository.cs
-    │   ├── IProductRepository.cs
-    │   ├── IProductImageRepository.cs
-    │   ├── ICustomerRepository.cs
-    │   ├── ICustomerAddressRepository.cs
-    │   ├── IOrderRepository.cs
-    │   ├── IOrderItemRepository.cs
-    │   └── IUnitOfWork.cs
-    └── Implementations
-        ├── GenericRepository.cs
-        ├── CategoryRepository.cs
-        ├── ProductRepository.cs
-        ├── ProductImageRepository.cs
-        ├── CustomerRepository.cs
-        ├── CustomerAddressRepository.cs
-        ├── OrderRepository.cs
-        ├── OrderItemRepository.cs
-        └── UnitOfWork.cs
+BookStore.Entities/
+├── Models/
+│   ├── Category.cs
+│   ├── Product.cs
+│   ├── ProductImage.cs
+│   ├── Customer.cs
+│   ├── CustomerAddress.cs
+│   ├── Order.cs
+│   └── OrderItem.cs
+└── Enums/
+    ├── OrderStatus.cs          → Pending, Processing, Shipped, Delivered, Cancelled
+    └── BookFormat.cs           → Paperback, Hardcover, Digital
+```
 
-BookStore.BLL
-├── DTOs
-│   ├── Category/   (CategoryCreateDto, CategoryUpdateDto, CategoryResultDto)
-│   ├── Product/    (ProductCreateDto, ProductUpdateDto, ProductResultDto, ProductImageResultDto)
-│   ├── Customer/   (CustomerCreateDto, CustomerUpdateDto, CustomerResultDto, Address DTOs)
-│   └── Order/      (OrderCreateDto, OrderUpdateDto, OrderResultDto, OrderItemDTOs)
-├── Services
+### BookStore.DAL
+```
+BookStore.DAL/
+├── ApplicationDbContext/
+│   └── AppDbContext.cs
+├── Configurations/
+│   ├── CategoryConfiguration.cs
+│   ├── ProductConfiguration.cs
+│   ├── ProductImageConfiguration.cs
+│   ├── CustomerConfiguration.cs
+│   ├── CustomerAddressConfiguration.cs
+│   ├── OrderConfiguration.cs
+│   └── OrderItemConfiguration.cs
+├── Repositories/
 │   ├── Interfaces/
+│   │   ├── IGenericRepository.cs
+│   │   ├── ICategoryRepository.cs
+│   │   ├── IProductRepository.cs
+│   │   ├── IProductImageRepository.cs
+│   │   ├── ICustomerRepository.cs
+│   │   ├── ICustomerAddressRepository.cs
+│   │   ├── IOrderRepository.cs
+│   │   ├── IOrderItemRepository.cs
+│   │   └── IUnitOfWork.cs
 │   └── Implementations/
-├── Validators
+│       ├── GenericRepository.cs
+│       ├── CategoryRepository.cs
+│       ├── ProductRepository.cs
+│       ├── ProductImageRepository.cs
+│       ├── CustomerRepository.cs
+│       ├── CustomerAddressRepository.cs
+│       ├── OrderRepository.cs
+│       ├── OrderItemRepository.cs
+│       └── UnitOfWork.cs
+├── Extensions/
+│   └── DALServicesExtension.cs
+└── Migrations/
+```
+
+### BookStore.BLL
+```
+BookStore.BLL/
+├── DTOs/
+│   ├── Category/
+│   │   ├── CategoryCreateDto.cs
+│   │   ├── CategoryUpdateDto.cs
+│   │   └── CategoryResultDto.cs
+│   ├── Product/
+│   │   ├── ProductCreateDto.cs
+│   │   ├── ProductUpdateDto.cs
+│   │   ├── ProductResultDto.cs
+│   │   └── ProductImageResultDto.cs
+│   ├── Customer/
+│   │   ├── CustomerCreateDto.cs
+│   │   ├── CustomerUpdateDto.cs
+│   │   ├── CustomerResultDto.cs
+│   │   ├── CustomerAddressCreateDto.cs
+│   │   ├── CustomerAddressUpdateDto.cs
+│   │   └── CustomerAddressResultDto.cs
+│   └── Order/
+│       ├── OrderCreateDto.cs
+│       ├── OrderUpdateDto.cs
+│       ├── OrderResultDto.cs
+│       ├── OrderItemCreateDto.cs
+│       └── OrderItemResultDto.cs
+├── Services/
+│   ├── Interfaces/
+│   │   ├── ICategoryService.cs
+│   │   ├── IProductService.cs
+│   │   ├── ICustomerService.cs
+│   │   ├── ICustomerAddressService.cs
+│   │   └── IOrderService.cs
+│   └── Implementations/
+│       ├── CategoryService.cs
+│       ├── ProductService.cs
+│       ├── CustomerService.cs
+│       ├── CustomerAddressService.cs
+│       └── OrderService.cs
+├── Validators/
 │   ├── AllowedExtensionsAttribute.cs
 │   ├── MaxFileSizeAttribute.cs
 │   ├── EgyptianPhoneAttribute.cs
@@ -245,12 +306,92 @@ BookStore.BLL
 │   ├── NonNegativeStockAttribute.cs
 │   ├── FutureDateAttribute.cs
 │   └── YearRangeAttribute.cs
-└── Helpers
-    ├── UploadHelper.cs
-    ├── PaginationHelper.cs
-    └── SlugHelper.cs
+├── Helpers/
+│   ├── UploadHelper.cs
+│   ├── PaginationHelper.cs
+│   └── SlugHelper.cs
+└── Extensions/
+    └── ApplicationServicesExtension.cs
 ```
 
+### BookStore.Web
+```
+BookStore.Web/
+├── Controllers/
+│   ├── HomeController.cs
+│   ├── CategoryController.cs
+│   ├── ProductController.cs
+│   ├── CustomerController.cs
+│   └── OrderController.cs
+├── ViewModels/
+│   ├── Category/
+│   │   ├── CategoryCreateViewModel.cs
+│   │   ├── CategoryEditViewModel.cs
+│   │   └── CategoryIndexViewModel.cs
+│   ├── Product/
+│   │   ├── ProductCreateViewModel.cs
+│   │   ├── ProductEditViewModel.cs
+│   │   └── ProductIndexViewModel.cs
+│   ├── Customer/
+│   │   ├── CustomerCreateViewModel.cs
+│   │   ├── CustomerEditViewModel.cs
+│   │   ├── CustomerIndexViewModel.cs
+│   │   ├── CustomerAddressCreateViewModel.cs
+│   │   └── CustomerAddressEditViewModel.cs
+│   └── Order/
+│       ├── OrderCreateViewModel.cs
+│       ├── OrderEditViewModel.cs
+│       ├── OrderIndexViewModel.cs
+│       ├── OrderDetailsViewModel.cs
+│       └── OrderItemViewModel.cs
+├── Views/
+│   ├── Shared/
+│   │   ├── _Layout.cshtml
+│   │   ├── _Navbar.cshtml
+│   │   ├── _Footer.cshtml
+│   │   ├── _Notifications.cshtml
+│   │   ├── _Pagination.cshtml
+│   │   └── Error.cshtml
+│   ├── Home/
+│   │   └── Index.cshtml
+│   ├── Category/
+│   │   ├── Index.cshtml
+│   │   ├── Details.cshtml
+│   │   ├── Create.cshtml
+│   │   ├── Edit.cshtml
+│   │   └── Delete.cshtml
+│   ├── Product/
+│   │   ├── Index.cshtml
+│   │   ├── Details.cshtml
+│   │   ├── Create.cshtml
+│   │   ├── Edit.cshtml
+│   │   └── Delete.cshtml
+│   ├── Customer/
+│   │   ├── Index.cshtml
+│   │   ├── Details.cshtml
+│   │   ├── Create.cshtml
+│   │   ├── Edit.cshtml
+│   │   ├── Delete.cshtml
+│   │   ├── Addresses.cshtml
+│   │   ├── CreateAddress.cshtml
+│   │   └── EditAddress.cshtml
+│   └── Order/
+│       ├── Index.cshtml
+│       ├── Details.cshtml
+│       ├── Create.cshtml
+│       └── Edit.cshtml
+├── wwwroot/
+│   ├── Files/
+│   │   ├── Products/
+│   │   └── Categories/
+│   ├── css/
+│   │   ├── shared.css
+│   │   └── home.css
+│   └── js/
+│       └── site.js
+├── appsettings.json
+└── Program.cs
+```
 ---
 
 ## 🗺️ Roadmap
