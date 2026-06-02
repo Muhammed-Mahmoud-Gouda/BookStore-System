@@ -1,0 +1,215 @@
+@model ShopNest.Web.ViewModels.Product.ProductEditViewModel
+@{
+    ViewData["Title"] = $"Edit {Model.Name} - BookStore Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 900px; margin: 2rem auto; padding: 0 5%;">
+    <div style="display: flex; gap: 0.8rem; align-items: center; margin-bottom: 2rem;">
+        <a href="@Url.Action("Index", "Product")" style="color: var(--text-dim);"><i class="fas fa-arrow-left"></i> Back to Book Catalog</a>
+    </div>
+
+    <div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2.5rem; box-shadow: var(--shadow-sm);">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 1.8rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--primary-pale); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-edit"></i> Edit Book: @Model.Name
+        </h2>
+
+        <form method="post" asp-action="Edit" asp-controller="Product" enctype="multipart/form-data" id="editProductForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-error" style="background: rgba(192,57,43,0.12); color: var(--error); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+            <!-- Basic Info Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 1.2rem;"><i class="fas fa-info-circle"></i> Basic Information</h3>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label asp-for="Name">Book Title</label>
+                    <input type="text" asp-for="Name" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;" required>
+                    <span asp-validation-for="Name" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label asp-for="CategoryId">Category</label>
+                        <select asp-for="CategoryId" asp-items="Model.Categories" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem; background: white; cursor: pointer;" required>
+                            <option value="">Select Category</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Format">Book Format</label>
+                        <select asp-for="Format" asp-items="Model.Formats" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem; background: white; cursor: pointer;" required>
+                            <option value="">Select Format</option>
+                        </select>
+                        <span asp-validation-for="Format" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label asp-for="Description">Overview Description</label>
+                    <textarea asp-for="Description" rows="4" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem; resize: vertical;"></textarea>
+                    <span asp-validation-for="Description" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                </div>
+            </div>
+
+            <!-- Price & Stock Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 1.2rem;"><i class="fas fa-tags"></i> Pricing & Inventory</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label asp-for="Price">Price (EGP)</label>
+                        <input type="number" asp-for="Price" step="1" min="1" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;" required>
+                        <span asp-validation-for="Price" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Stock">Stock Count</label>
+                        <input type="number" asp-for="Stock" min="0" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;" required>
+                        <span asp-validation-for="Stock" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Specs Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 1.2rem;"><i class="fas fa-microchip"></i> Specifications</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label asp-for="Author">Author</label>
+                        <input type="text" asp-for="Author" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;" required>
+                        <span asp-validation-for="Author" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Publisher">Publisher</label>
+                        <input type="text" asp-for="Publisher" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;">
+                        <span asp-validation-for="Publisher" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label asp-for="ISBN">ISBN-13</label>
+                        <input type="text" asp-for="ISBN" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;">
+                        <span asp-validation-for="ISBN" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                    <div>
+                        <label asp-for="PublicationYear">Publication Year</label>
+                        <input type="number" asp-for="PublicationYear" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;">
+                        <span asp-validation-for="PublicationYear" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label asp-for="Pages">Pages Count</label>
+                        <input type="number" asp-for="Pages" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;">
+                        <span asp-validation-for="Pages" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Language">Language</label>
+                        <input type="text" asp-for="Language" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;">
+                        <span asp-validation-for="Language" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Edition">Edition</label>
+                        <input type="text" asp-for="Edition" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;">
+                        <span asp-validation-for="Edition" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing Images Gallery -->
+            @if (Model.ExistingImages != null && Model.ExistingImages.Any())
+            {
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 1.2rem;"><i class="fas fa-images"></i> Manage Current Gallery</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1rem;">Click the red Trash icon on any image to mark it for deletion.</p>
+                    
+                    <div style="display: flex; gap: 1.2rem; flex-wrap: wrap;">
+                        @foreach (var img in Model.ExistingImages)
+                        {
+                            <div class="existing-img-card" id="img-card-@img.Id" style="width: 90px; height: 120px; border-radius: 8px; border: 1.5px solid var(--border-color); overflow: hidden; background: #faf8f3; display: flex; align-items: center; justify-content: center; padding: 0.4rem; position: relative;">
+                                <img src="@img.ImagePath" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Book Cover">
+                                <div onclick="markImageForRemoval(@img.Id)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(192,57,43,0.85); color: white; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; cursor: pointer;" class="img-delete-overlay">
+                                    <i class="fas fa-trash-alt" style="font-size: 1.5rem;"></i>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Hidden inputs container for removed IDs -->
+                    <div id="removedIdsContainer"></div>
+                </div>
+            }
+
+            <!-- Upload New Images -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 1.2rem;"><i class="fas fa-file-upload"></i> Upload New Images</h3>
+                <div>
+                    <label asp-for="NewImages">Upload Additional Images</label>
+                    <input type="file" asp-for="NewImages" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1.5px dashed var(--border-color); background: var(--primary-pale); cursor: pointer;" accept="image/*" multiple>
+                    <span asp-validation-for="NewImages" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                </div>
+            </div>
+
+            <!-- Active Checkbox -->
+            <div style="margin-bottom: 3rem; display: flex; align-items: center; gap: 0.8rem;">
+                <input type="checkbox" asp-for="IsActive" style="width: 18px; height: 18px; cursor: pointer;">
+                <label asp-for="IsActive" style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); cursor: pointer; margin: 0;">Make Book Active (Publicly Available)</label>
+            </div>
+
+            <!-- Form actions -->
+            <div style="display: flex; gap: 1rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+                <button type="submit" class="btn-primary-sm" style="flex: 1; padding: 0.85rem; justify-content: center; border-radius: 8px; font-weight: 700;">
+                    <i class="fas fa-save"></i> Save Catalog Changes
+                </button>
+                <a href="@Url.Action("Index", "Product")" class="btn-primary-sm" style="flex: 1; padding: 0.85rem; justify-content: center; text-decoration: none; border-radius: 8px; background: white; color: var(--text-muted); border: 1.5px solid var(--border-color);">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        form label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .existing-img-card:hover .img-delete-overlay {
+            opacity: 1 !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        const removedIds = [];
+
+        function markImageForRemoval(imgId) {
+            removedIds.push(imgId);
+            
+            // Hide the card
+            document.getElementById(`img-card-${imgId}`).style.display = 'none';
+
+            // Add hidden inputs to form
+            const container = document.getElementById('removedIdsContainer');
+            container.innerHTML = ''; // reset
+            removedIds.forEach((id, idx) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `RemovedImageIds[${idx}]`;
+                input.value = id;
+                container.appendChild(input);
+            });
+        }
+    </script>
+}

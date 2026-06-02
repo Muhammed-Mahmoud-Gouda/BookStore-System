@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShopNest.BLL.DTOs.Order;
 using ShopNest.BLL.Services.Interfaces;
 using ShopNest.Web.ViewModels.Order;
 using ShpoNest.Models.Enums;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace ShopNest.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;

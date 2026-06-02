@@ -1,0 +1,335 @@
+@model ShopNest.Web.Controllers.CheckoutViewModel
+@using ShopNest.BLL.DTOs.Customer
+@using ShopNest.Web.Controllers
+@{
+    ViewData["Title"] = "Checkout - BookStore";
+    var savedAddresses = ViewBag.Addresses as List<CustomerAddressResultDto> ?? new List<CustomerAddressResultDto>();
+    var cartItems = ViewBag.Cart as List<CartItem> ?? new List<CartItem>();
+    var cartTotal = ViewBag.CartTotal ?? 0;
+}
+
+@section Styles {
+    <style>
+        .checkout-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .checkout-panel {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .checkout-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-bottom: 2px solid var(--primary-pale);
+            padding-bottom: 0.6rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border-color);
+            outline: none;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(27, 67, 50, 0.06);
+        }
+
+        .select-address-dropdown {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border-color);
+            outline: none;
+            font-weight: 600;
+            background: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .select-address-dropdown:focus {
+            border-color: var(--primary);
+        }
+
+        /* Order items sidebar */
+        .order-sidebar {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            max-width: 70%;
+        }
+
+        .item-img {
+            width: 45px;
+            height: 60px;
+            background: #faf8f3;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.2rem;
+            flex-shrink: 0;
+        }
+
+        .item-img img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .item-desc h5 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-desc span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .item-price {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--text-main);
+        }
+
+        .btn-order {
+            background: var(--accent);
+            color: white;
+            padding: 0.9rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(201, 150, 59, 0.2);
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .btn-order:hover {
+            background: #b5802a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(201, 150, 59, 0.3);
+        }
+    </style>
+}
+
+<div class="checkout-container">
+    <h2 class="cart-title" style="margin-bottom: 2.5rem;"><i class="fas fa-credit-card"></i> Secure Checkout</h2>
+
+    <div class="checkout-grid">
+        <!-- Form Panel -->
+        <div class="checkout-panel">
+            <form method="post" asp-action="Checkout" asp-controller="Cart">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-error" style="background: rgba(192,57,43,0.12); color: var(--error); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+                <!-- Shipping Address Section -->
+                <div class="checkout-section">
+                    <h3 class="checkout-title"><i class="fas fa-truck"></i> Shipping Information</h3>
+
+                    @if (savedAddresses.Any())
+                    {
+                        <div class="form-group">
+                            <label asp-for="SelectedAddressId">Select a Saved Address</label>
+                            <select asp-for="SelectedAddressId" class="select-address-dropdown" id="addressSelect" onchange="toggleNewAddressForm()">
+                                @foreach (var addr in savedAddresses)
+                                {
+                                    <option value="@addr.Id" selected="@(addr.IsDefault)">
+                                        [@addr.Label] @addr.Street, @addr.City @(string.IsNullOrEmpty(addr.PostalCode) ? "" : $"- {addr.PostalCode}")
+                                    </option>
+                                }
+                                <option value="0">--- Add a new shipping address ---</option>
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="SelectedAddressId" value="0" />
+                    }
+
+                    <!-- New Address Form (collapsible) -->
+                    <div id="newAddressForm" style="display: @(savedAddresses.Any() ? "none" : "block"); background: #faf8f3; border-radius: var(--radius-sm); border: 1px dashed var(--border-color); padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;"><i class="fas fa-plus-circle"></i> Add New Address</h4>
+                        
+                        <div class="form-group">
+                            <label asp-for="AddressLabel">Address Label (e.g., Home, Work)</label>
+                            <input type="text" asp-for="AddressLabel" class="form-input" placeholder="Home">
+                            <span asp-validation-for="AddressLabel" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Street">Street Details</label>
+                            <input type="text" asp-for="Street" class="form-input" id="streetInput" placeholder="123 El-Tahrir Street, Apartment 4B" required="@(!savedAddresses.Any())">
+                            <span asp-validation-for="Street" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                        </div>
+
+                        <div class="form-row" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label asp-for="City">City</label>
+                                <input type="text" asp-for="City" class="form-input" id="cityInput" placeholder="Cairo" required="@(!savedAddresses.Any())">
+                                <span asp-validation-for="City" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="PostalCode">Postal Code (Optional)</label>
+                                <input type="text" asp-for="PostalCode" class="form-input" placeholder="11511">
+                                <span asp-validation-for="PostalCode" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Notes Section -->
+                <div class="checkout-section" style="margin-top: 2rem;">
+                    <h3 class="checkout-title"><i class="fas fa-pencil-alt"></i> Special Instructions</h3>
+                    <div class="form-group">
+                        <label asp-for="Notes">Delivery Notes</label>
+                        <textarea asp-for="Notes" rows="3" class="form-input" style="resize: vertical; min-height: 80px;" placeholder="Gate code, landmark details, or preferred call times..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-order">
+                    <i class="fas fa-lock"></i> Place Secure Order
+                </button>
+            </form>
+        </div>
+
+        <!-- Summary Sidebar -->
+        <div class="order-sidebar">
+            <h3 class="summary-title" style="margin-bottom: 1rem;">Review Your Order</h3>
+            
+            <div style="max-height: 300px; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1.5rem;">
+                @foreach (var item in cartItems)
+                {
+                    <div class="item-row">
+                        <div class="item-info">
+                            <div class="item-img">
+                                <img src="@item.MainImagePath" alt="@item.BookName" onerror="this.src='/images/default-book.png'">
+                            </div>
+                            <div class="item-desc">
+                                <h5>@item.BookName</h5>
+                                <span>Qty: @item.Quantity</span>
+                            </div>
+                        </div>
+                        <div class="item-price">
+                            EGP @(item.Total.ToString("N0"))
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="summary-row" style="margin-bottom: 0.8rem;">
+                <span>Cart Subtotal</span>
+                <span style="font-weight: 600;">EGP @(cartTotal.ToString("N0"))</span>
+            </div>
+            <div class="summary-row" style="margin-bottom: 0.8rem;">
+                <span>Shipping Fee</span>
+                <span style="color: #2da44e; font-weight: 700;">FREE</span>
+            </div>
+            <div class="summary-row total-row" style="border-top: 1px dashed var(--border-color); padding-top: 1rem; font-size: 1.2rem; font-weight: 800; color: var(--primary);">
+                <span>Total Due</span>
+                <span>EGP @(cartTotal.ToString("N0"))</span>
+            </div>
+
+            <div style="background: var(--primary-pale); border-radius: 8px; border: 1.5px solid var(--primary-light); padding: 1rem; display: flex; gap: 0.8rem; margin-top: 1.5rem; align-items: flex-start;">
+                <i class="fas fa-shield-alt" style="color: var(--primary); font-size: 1.2rem; margin-top: 0.2rem;"></i>
+                <div style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">
+                    Your data is secured using SSL. Payment is processed cash-on-delivery in Egypt.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleNewAddressForm() {
+            const select = document.getElementById('addressSelect');
+            const newForm = document.getElementById('newAddressForm');
+            const street = document.getElementById('streetInput');
+            const city = document.getElementById('cityInput');
+
+            if (select && select.value === '0') {
+                newForm.style.display = 'block';
+                street.setAttribute('required', 'true');
+                city.setAttribute('required', 'true');
+            } else {
+                newForm.style.display = 'none';
+                street.removeAttribute('required');
+                city.removeAttribute('required');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', toggleNewAddressForm);
+    </script>
+}

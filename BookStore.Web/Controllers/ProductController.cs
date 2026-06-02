@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ShopNest.BLL.DTOs.Product;
 using ShopNest.BLL.Services.Interfaces;
 using ShopNest.Web.ViewModels.Product;
 using ShpoNest.Models.Enums;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace ShopNest.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;

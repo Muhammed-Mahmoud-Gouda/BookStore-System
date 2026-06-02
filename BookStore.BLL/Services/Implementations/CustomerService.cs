@@ -1,4 +1,4 @@
-﻿using ShopNest.BLL.DTOs.Customer;
+using ShopNest.BLL.DTOs.Customer;
 using ShopNest.BLL.Services.Interfaces;
 using ShopNest.DAL.Repositories.Interfaces;
 using ShpoNest.Models.Entities;
@@ -51,6 +51,8 @@ namespace ShopNest.BLL.Services.Implementations
                 Phone = dto.Phone,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
+                PasswordHash = ShopNest.BLL.Helper.PasswordHasher.HashPassword(dto.Password),
+                IsAdmin = false, // default to customer
             };
 
             await _unitOfWork.Customers.AddAsync(customer);
@@ -71,6 +73,12 @@ namespace ShopNest.BLL.Services.Implementations
             customer.Email = dto.Email;
             customer.Phone = dto.Phone;
             customer.IsActive = dto.IsActive;
+            customer.IsAdmin = dto.IsAdmin;
+
+            if (!string.IsNullOrEmpty(dto.Password))
+            {
+                customer.PasswordHash = ShopNest.BLL.Helper.PasswordHasher.HashPassword(dto.Password);
+            }
 
             _unitOfWork.Customers.Update(customer);
             await _unitOfWork.SaveChangesAsync();
@@ -105,6 +113,8 @@ namespace ShopNest.BLL.Services.Implementations
                 Email = customer.Email,
                 Phone = customer.Phone,
                 IsActive = customer.IsActive,
+                IsAdmin = customer.IsAdmin,
+                PasswordHash = customer.PasswordHash,
                 OrdersCount = customer.Orders?.Count() ?? 0,
                 Addresses = customer.Addresses?
                     .Select(a => new CustomerAddressResultDto

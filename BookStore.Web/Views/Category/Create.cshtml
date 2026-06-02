@@ -1,0 +1,50 @@
+@model ShopNest.Web.ViewModels.Category.CategoryCreateViewModel
+@{
+    ViewData["Title"] = "Create Category - BookStore Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 800px; margin: 2rem auto; padding: 0 5%;">
+    <div style="display: flex; gap: 0.8rem; align-items: center; margin-bottom: 2rem;">
+        <a href="@Url.Action("Index", "Category")" style="color: var(--text-dim);"><i class="fas fa-arrow-left"></i> Back to Categories</a>
+    </div>
+
+    <div style="background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2.5rem; box-shadow: var(--shadow-sm);">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 1.8rem; padding-bottom: 0.6rem; border-bottom: 2px solid var(--primary-pale); display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-plus-circle"></i> Create New Category
+        </h2>
+
+        <form method="post" asp-action="Create" asp-controller="Category" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-error" style="background: rgba(192,57,43,0.12); color: var(--error); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label asp-for="Name" style="display: block; font-weight: 700; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Category Name</label>
+                <input type="text" asp-for="Name" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem;" placeholder="e.g. Artificial Intelligence" required>
+                <span asp-validation-for="Name" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label asp-for="Description" style="display: block; font-weight: 700; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Description</label>
+                <textarea asp-for="Description" rows="4" style="width: 100%; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border-color); outline: none; font-size: 0.95rem; resize: vertical;" placeholder="Write a short summary about this category..."></textarea>
+                <span asp-validation-for="Description" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+            </div>
+
+            <div style="margin-bottom: 2.5rem;">
+                <label asp-for="Image" style="display: block; font-weight: 700; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">Category Image</label>
+                <input type="file" asp-for="Image" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1.5px dashed var(--border-color); background: var(--primary-pale); cursor: pointer;" accept="image/*">
+                <span asp-validation-for="Image" class="text-danger" style="font-size: 0.8rem; color: var(--error);"></span>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn-primary-sm" style="flex: 1; padding: 0.85rem; justify-content: center; border-radius: 8px; font-weight: 700;">
+                    <i class="fas fa-check"></i> Save Category
+                </button>
+                <a href="@Url.Action("Index", "Category")" class="btn-primary-sm" style="flex: 1; padding: 0.85rem; justify-content: center; text-decoration: none; border-radius: 8px; background: white; color: var(--text-muted); border: 1.5px solid var(--border-color);">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

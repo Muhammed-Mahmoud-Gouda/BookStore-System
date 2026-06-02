@@ -1,4 +1,4 @@
-﻿
+
 
 @using ShopNest.BLL.DTOs.Product
 @using ShopNest.BLL.DTOs.Category
@@ -81,7 +81,7 @@
                 <span class="subtitle">Browse by Interest</span>
                 <h2>Popular Categories</h2>
             </div>
-            <a href="@Url.Action("Index", "Shop")" class="view-all-link">
+            <a href="@Url.Action("Index", "Category")" class="view-all-link">
                 View All Categories <i class="fas fa-arrow-right"></i>
             </a>
         </div>
@@ -457,16 +457,39 @@
                 updateCarousel();
             }
             
-            // ══ Add to Cart Animation ══
+            // ══ Add to Cart Animation & Request ══
             document.querySelectorAll('.cart-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const bookId = this.dataset.bookId;
-                    this.classList.add('clicked');
-                    setTimeout(() => this.classList.remove('clicked'), 300);
+                    const self = this;
                     
-                    // Show toast notification
-                    showToast('Added to cart successfully! 🛒');
+                    self.classList.add('clicked');
+                    setTimeout(() => self.classList.remove('clicked'), 300);
+                    
+                    // Post to Cart Add
+                    fetch(`/Cart/Add/${bookId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Added to cart successfully! 🛒');
+                            // Update badge count in navbar
+                            document.querySelectorAll('.badge').forEach(badge => {
+                                badge.textContent = data.cartCount;
+                            });
+                        } else {
+                            showToast(data.message || 'Error adding book.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        showToast('Failed to add book to cart.');
+                    });
                 });
             });
             

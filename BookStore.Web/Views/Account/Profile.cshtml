@@ -1,0 +1,1032 @@
+@model ShopNest.BLL.DTOs.Customer.CustomerResultDto
+@using ShopNest.BLL.DTOs.Order
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "My Account - BookStore";
+    var orders = ViewBag.Orders as List<OrderResultDto> ?? new List<OrderResultDto>();
+}
+
+<div class="profile-page-wrapper">
+    <div class="container-xl">
+        
+        <!-- Alerts -->
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success animate-fade">
+                <i class="fas fa-check-circle"></i>
+                <span>@TempData["Success"]</span>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error animate-fade">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>@TempData["Error"]</span>
+            </div>
+        }
+
+        <!-- Profile Header -->
+        <header class="profile-header card-glass animate-up">
+            <div class="profile-avatar">
+                <span>@Model.FirstName[0]@Model.LastName[0]</span>
+            </div>
+            <div class="profile-header-info">
+                <h1>@Model.FullName</h1>
+                <div class="profile-badges">
+                    <span class="badge-role @(Model.IsAdmin ? "admin" : "customer")">
+                        <i class="fas @(Model.IsAdmin ? "fa-shield-halved" : "fa-user")"></i>
+                        @(Model.IsAdmin ? "Administrator" : "Customer")
+                    </span>
+                    <span class="profile-meta-item">
+                        <i class="fas fa-envelope"></i> @Model.Email
+                    </span>
+                </div>
+            </div>
+            <div class="profile-header-actions">
+                <form asp-action="Logout" asp-controller="Account" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-logout-header">
+                        <i class="fas fa-sign-out-alt"></i> Sign Out
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Profile Body (Sidebar + Tabs content) -->
+        <div class="profile-grid">
+            
+            <!-- Sidebar Navigation -->
+            <aside class="profile-sidebar animate-up" style="animation-delay: 0.1s;">
+                <nav class="profile-nav-menu">
+                    <button class="nav-tab-btn active" data-target="#tab-details">
+                        <i class="fas fa-address-card"></i> Personal Info
+                    </button>
+                    <button class="nav-tab-btn" data-target="#tab-orders">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                        @if (orders.Any())
+                        {
+                            <span class="orders-count-badge">@orders.Count</span>
+                        }
+                    </button>
+                    <button class="nav-tab-btn" data-target="#tab-addresses">
+                        <i class="fas fa-map-marker-alt"></i> Saved Addresses
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Tab Content Area -->
+            <main class="profile-content card-glass animate-up" style="animation-delay: 0.2s;">
+                
+                <!-- ══ TAB: DETAILS ══ -->
+                <div class="tab-pane active" id="tab-details">
+                    <div class="tab-pane-header">
+                        <h2>Personal Details</h2>
+                        <p>Manage your account settings and contact details.</p>
+                    </div>
+                    <div class="info-details-grid">
+                        <div class="info-box">
+                            <span class="info-label">First Name</span>
+                            <span class="info-value">@Model.FirstName</span>
+                        </div>
+                        <div class="info-box">
+                            <span class="info-label">Last Name</span>
+                            <span class="info-value">@Model.LastName</span>
+                        </div>
+                        <div class="info-box span-full">
+                            <span class="info-label">Email Address</span>
+                            <span class="info-value">@Model.Email</span>
+                        </div>
+                        <div class="info-box">
+                            <span class="info-label">Phone Number</span>
+                            <span class="info-value">@(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</span>
+                        </div>
+                        <div class="info-box">
+                            <span class="info-label">Status</span>
+                            <span class="info-value text-success">
+                                <i class="fas fa-circle-check"></i> Active Account
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ TAB: ORDERS ══ -->
+                <div class="tab-pane" id="tab-orders">
+                    <div class="tab-pane-header">
+                        <h2>Order History</h2>
+                        <p>Track your recent orders and review your purchasing history.</p>
+                    </div>
+                    
+                    @if (orders.Any())
+                    {
+                        <div class="orders-list">
+                            @foreach (var order in orders)
+                            {
+                                <div class="order-collapse-card">
+                                    <div class="order-collapse-header" onclick="toggleOrderDetails(this)">
+                                        <div class="order-id">
+                                            <span class="id-lbl">ORDER</span>
+                                            <span class="id-val">#@order.Id</span>
+                                        </div>
+                                        <div class="order-date">
+                                            <i class="far fa-calendar-alt"></i> @order.OrderDate.ToString("MMM dd, yyyy")
+                                        </div>
+                                        <div class="order-amount">
+                                            EGP @order.TotalAmount.ToString("N0")
+                                        </div>
+                                        <div class="order-status-wrapper">
+                                            <span class="badge-status @order.Status.ToString().ToLower()">
+                                                <i class="fas fa-circle"></i> @order.Status
+                                            </span>
+                                        </div>
+                                        <div class="collapse-icon">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                    <div class="order-collapse-body">
+                                        <div class="order-body-grid">
+                                            <!-- Shipping Details -->
+                                            <div class="body-shipping">
+                                                <h4><i class="fas fa-truck"></i> Shipping Address</h4>
+                                                <p>@order.ShippingStreet</p>
+                                                <p>@order.ShippingCity @(string.IsNullOrEmpty(order.ShippingPostalCode) ? "" : $", {order.ShippingPostalCode}")</p>
+                                                @if (!string.IsNullOrEmpty(order.Notes))
+                                                {
+                                                    <div class="order-notes">
+                                                        <strong>Notes:</strong> @order.Notes
+                                                    </div>
+                                                }
+                                            </div>
+                                            <!-- Items Details -->
+                                            <div class="body-items">
+                                                <h4><i class="fas fa-book"></i> Book List</h4>
+                                                <ul class="order-items-list">
+                                                    @foreach (var item in order.Items)
+                                                    {
+                                                        <li>
+                                                            <div class="item-pic">
+                                                                <img src="@(string.IsNullOrEmpty(item.MainImagePath) ? "/images/default-book.png" : item.MainImagePath)" alt="@item.ProductName" onerror="this.src='/images/default-book.png'">
+                                                            </div>
+                                                            <div class="item-name-qty">
+                                                                <span class="name">@item.ProductName</span>
+                                                                <span class="qty">Qty: @item.Quantity</span>
+                                                            </div>
+                                                            <div class="item-price">
+                                                                EGP @item.TotalPrice
+                                                            </div>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="profile-empty-state">
+                            <i class="fas fa-shopping-basket"></i>
+                            <h3>No Orders Placed</h3>
+                            <p>You haven't ordered any books yet. Explore Egypt's premier tech catalog now!</p>
+                            <a href="@Url.Action("Index", "Shop")" class="btn-action-primary">Shop Technical Books</a>
+                        </div>
+                    }
+                </div>
+
+                <!-- ══ TAB: ADDRESSES ══ -->
+                <div class="tab-pane" id="tab-addresses">
+                    <div class="tab-pane-header flex-header">
+                        <div>
+                            <h2>Saved Addresses</h2>
+                            <p>Manage your saved shipping addresses for faster checkout.</p>
+                        </div>
+                        <button class="btn-action-primary" onclick="showAddAddressForm()">
+                            <i class="fas fa-plus"></i> Add New Address
+                        </button>
+                    </div>
+
+                    <!-- Add Address Form Panel -->
+                    <div class="add-address-panel card-nested d-none" id="addAddressPanel">
+                        <h3><i class="fas fa-map-marker-alt"></i> Add Shipping Address</h3>
+                        <form asp-action="AddAddress" asp-controller="Account" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="form-row">
+                                <div class="form-col col-6">
+                                    <label for="label">Address Label</label>
+                                    <input type="text" id="label" name="label" placeholder="e.g. Home, Office, Work" required>
+                                </div>
+                                <div class="form-col col-6">
+                                    <label for="postalCode">Postal Code (Optional)</label>
+                                    <input type="text" id="postalCode" name="postalCode" placeholder="e.g. 11511">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-col col-8">
+                                    <label for="street">Street Address</label>
+                                    <input type="text" id="street" name="street" placeholder="e.g. 12 El-Galaa St, Heliopolis" required>
+                                </div>
+                                <div class="form-col col-4">
+                                    <label for="city">City</label>
+                                    <input type="text" id="city" name="city" placeholder="e.g. Cairo" required>
+                                </div>
+                            </div>
+                            <div class="form-actions-row">
+                                <button type="button" class="btn-action-cancel" onclick="hideAddAddressForm()">Cancel</button>
+                                <button type="submit" class="btn-action-submit">Save Address</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Addresses List -->
+                    @if (Model.Addresses != null && Model.Addresses.Any())
+                    {
+                        <div class="addresses-grid">
+                            @foreach (var addr in Model.Addresses)
+                            {
+                                <div class="address-card @(addr.IsDefault ? "default" : "")">
+                                    @if (addr.IsDefault)
+                                    {
+                                        <span class="default-badge"><i class="fas fa-check-circle"></i> Default Address</span>
+                                    }
+                                    <h3 class="address-label">
+                                        <i class="fas fa-map-pin"></i> @addr.Label
+                                    </h3>
+                                    <p class="address-street">@addr.Street</p>
+                                    <p class="address-city-zip">@addr.City @(string.IsNullOrEmpty(addr.PostalCode) ? "" : $", {addr.PostalCode}")</p>
+                                    
+                                    <div class="address-actions">
+                                        @if (!addr.IsDefault)
+                                        {
+                                            <form asp-action="SetDefaultAddress" asp-controller="Account" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@addr.Id">
+                                                <button type="submit" class="btn-addr-link select-default">Set Default</button>
+                                            </form>
+                                            <span class="separator">|</span>
+                                            <form asp-action="DeleteAddress" asp-controller="Account" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this address?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@addr.Id">
+                                                <button type="submit" class="btn-addr-link delete"><i class="fas fa-trash"></i> Delete</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="profile-empty-state">
+                            <i class="fas fa-map-location-dot"></i>
+                            <h3>No Saved Addresses</h3>
+                            <p>Add a shipping address to your account to checkout quickly during purchases.</p>
+                            <button class="btn-action-primary" onclick="showAddAddressForm()">Add Your First Address</button>
+                        </div>
+                    }
+                </div>
+
+            </main>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tab switching logic
+            const tabButtons = document.querySelectorAll('.nav-tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Remove active from buttons and panes
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+
+                    // Add active to current
+                    this.classList.add('active');
+                    const target = this.dataset.target;
+                    document.querySelector(target).classList.add('active');
+                });
+            });
+        });
+
+        function showAddAddressForm() {
+            document.getElementById('addAddressPanel').classList.remove('d-none');
+            document.getElementById('label').focus();
+        }
+
+        function hideAddAddressForm() {
+            document.getElementById('addAddressPanel').classList.add('d-none');
+        }
+
+        function toggleOrderDetails(headerElement) {
+            const card = headerElement.closest('.order-collapse-card');
+            card.classList.toggle('expanded');
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        /* ══ Global Variables & Styles ══ */
+        .profile-page-wrapper {
+            padding: 40px 0;
+            background-color: var(--bg-page);
+            min-height: 80vh;
+        }
+
+        /* Glassmorphism card utility */
+        .card-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Animations */
+        .animate-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: paneUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .animate-fade {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @@keyframes paneUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Alerts */
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-mid) 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(27,67,50,0.2);
+            text-transform: uppercase;
+        }
+        .profile-header-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        .profile-header-info h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        .profile-badges {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .badge-role {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .badge-role.customer {
+            background-color: var(--accent-light);
+            color: var(--accent);
+        }
+        .badge-role.admin {
+            background-color: #f8d7da;
+            color: var(--error);
+        }
+        .profile-meta-item {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-logout-header {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+        .btn-logout-header:hover {
+            border-color: var(--error);
+            color: var(--error);
+            background-color: #fdf3f2;
+            transform: translateY(-2px);
+        }
+
+        /* Profile Layout Grid */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* Sidebar Navigation */
+        .profile-sidebar {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .profile-nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .nav-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: left;
+            transition: var(--transition);
+        }
+        .nav-tab-btn i {
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+        .nav-tab-btn:hover {
+            background: var(--primary-pale);
+            color: var(--primary);
+        }
+        .nav-tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .orders-count-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Content Area & Tab Control */
+        .profile-content {
+            padding: 2.5rem;
+            min-height: 450px;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .tab-pane-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .tab-pane-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+        }
+        .tab-pane-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Info Grid - Personal Details */
+        .info-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .info-box {
+            display: flex;
+            flex-direction: column;
+            padding: 1.2rem;
+            background-color: var(--bg-cream);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+        }
+        .info-box.span-full {
+            grid-column: span 2;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 0.4rem;
+        }
+        .info-value {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .text-success {
+            color: #0f5132 !important;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        /* Empty States */
+        .profile-empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+        .profile-empty-state i {
+            font-size: 3rem;
+            color: var(--border-color);
+            margin-bottom: 1rem;
+        }
+        .profile-empty-state h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+        }
+        .profile-empty-state p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Collapse Card - Order History */
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .order-collapse-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: white;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .order-collapse-card:hover {
+            box-shadow: 0 4px 15px rgba(27,67,50,0.05);
+        }
+        .order-collapse-header {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr 1fr 40px;
+            align-items: center;
+            padding: 1.2rem;
+            cursor: pointer;
+            background-color: var(--bg-cream);
+            transition: var(--transition);
+        }
+        .order-collapse-header:hover {
+            background-color: var(--primary-pale);
+        }
+        .order-id {
+            display: flex;
+            flex-direction: column;
+        }
+        .order-id .id-lbl {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+        .order-id .id-val {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .order-date {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .order-amount {
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-status i {
+            font-size: 0.5rem;
+        }
+        .badge-status.pending { background-color: #fff3cd; color: #856404; }
+        .badge-status.processing { background-color: #cfe2ff; color: #084298; }
+        .badge-status.shipped { background-color: #d1e7dd; color: #0f5132; }
+        .badge-status.delivered { background-color: #d1e7dd; color: #0f5132; }
+        .badge-status.cancelled { background-color: #f8d7da; color: #842029; }
+
+        .collapse-icon {
+            text-align: right;
+            color: var(--text-dim);
+            transition: transform 0.3s ease;
+        }
+        .order-collapse-card.expanded .collapse-icon {
+            transform: rotate(180deg);
+        }
+
+        .order-collapse-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            border-top: 1px solid transparent;
+        }
+        .order-collapse-card.expanded .order-collapse-body {
+            max-height: 600px;
+            border-top: 1px solid var(--border-color);
+        }
+        .order-body-grid {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+        .order-body-grid h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.75rem;
+            border-bottom: 1.5px solid var(--border-color);
+            padding-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .body-shipping p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .order-notes {
+            margin-top: 1rem;
+            padding: 0.6rem 0.8rem;
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            color: #856404;
+        }
+        .order-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .order-items-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        .item-pic {
+            width: 40px;
+            height: 60px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .item-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .item-name-qty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .item-name-qty .name {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .item-name-qty .qty {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .item-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Saved Addresses Section */
+        .flex-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .addresses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .address-card {
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            position: relative;
+            background: white;
+            transition: var(--transition);
+        }
+        .address-card.default {
+            border-color: var(--primary);
+            background-color: var(--primary-pale);
+        }
+        .default-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .address-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .address-street {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+        .address-city-zip {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+        .address-actions {
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .btn-addr-link {
+            border: none;
+            background: none;
+            padding: 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-addr-link.select-default {
+            color: var(--primary);
+        }
+        .btn-addr-link.select-default:hover {
+            color: var(--primary-mid);
+        }
+        .btn-addr-link.delete {
+            color: var(--error);
+        }
+        .btn-addr-link.delete:hover {
+            color: #a93226;
+        }
+        .separator {
+            color: var(--border-color);
+        }
+
+        /* Buttons & Forms */
+        .btn-action-primary {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .btn-action-primary:hover {
+            background-color: var(--primary-mid);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            color: white;
+        }
+        
+        .card-nested {
+            background: var(--bg-cream);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .add-address-panel {
+            margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .add-address-panel h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .form-col {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        .col-6 { flex: 0 0 calc(50% - 0.5rem); }
+        .col-8 { flex: 0 0 calc(66.6% - 0.5rem); }
+        .col-4 { flex: 0 0 calc(33.3% - 0.5rem); }
+        
+        .add-address-panel label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .add-address-panel input {
+            padding: 0.6rem 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+        }
+        .add-address-panel input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(27,67,50,0.08);
+        }
+        .form-actions-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+        .btn-action-cancel {
+            background-color: white;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .btn-action-cancel:hover {
+            background-color: var(--bg-cream);
+            border-color: var(--text-muted);
+        }
+        .btn-action-submit {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .btn-action-submit:hover {
+            background-color: var(--primary-mid);
+            transform: translateY(-2px);
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        /* ══ Media Queries ══ */
+        @@media (max-width: 992px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .profile-sidebar {
+                position: static;
+            }
+        }
+        
+        @@media (max-width: 600px) {
+            .order-collapse-header {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+            .order-collapse-header .order-status-wrapper {
+                grid-column: span 2;
+                margin-top: 0.25rem;
+            }
+            .collapse-icon {
+                display: none;
+            }
+            .order-body-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .info-details-grid {
+                grid-template-columns: 1fr;
+            }
+            .info-box.span-full {
+                grid-column: span 1;
+            }
+            .form-col {
+                flex: 0 0 100% !important;
+            }
+        }
+    </style>
+}

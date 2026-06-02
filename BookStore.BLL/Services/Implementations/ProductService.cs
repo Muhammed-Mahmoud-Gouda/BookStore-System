@@ -1,4 +1,4 @@
-﻿using ShopNest.BLL.DTOs.Product;
+using ShopNest.BLL.DTOs.Product;
 using ShopNest.BLL.Helper;
 using ShopNest.DAL.Repositories.Interfaces;
 using ShpoNest.Models.Entities;
@@ -229,6 +229,7 @@ namespace ShopNest.BLL.Services.Implementations
 
         private static ProductResultDto MapToResultDto(Product product)
         {
+            var mainImage = product.Images?.FirstOrDefault(i => i.IsMain);
             return new ProductResultDto
             {
                 Id = product.Id,
@@ -247,14 +248,19 @@ namespace ShopNest.BLL.Services.Implementations
                 Language = product.Language,
                 Edition = product.Edition,
                 Format = product.Format,
-                MainImagePath = product.Images?
-                    .FirstOrDefault(i => i.IsMain)?.ImagePath,
+                MainImagePath = mainImage?.ImagePath != null
+                    ? (mainImage.ImagePath.StartsWith("/") || mainImage.ImagePath.StartsWith("http")
+                        ? mainImage.ImagePath
+                        : $"/Files/Products/{mainImage.ImagePath}")
+                    : null,
                 Images = product.Images?
                     .OrderBy(i => i.DisplayOrder)
                     .Select(i => new ProductImageResultDto
                     {
                         Id = i.Id,
-                        ImagePath = i.ImagePath,
+                        ImagePath = i.ImagePath != null && (i.ImagePath.StartsWith("/") || i.ImagePath.StartsWith("http"))
+                            ? i.ImagePath
+                            : $"/Files/Products/{i.ImagePath}",
                         IsMain = i.IsMain,
                         DisplayOrder = i.DisplayOrder,
                     }).ToList() ?? new(),

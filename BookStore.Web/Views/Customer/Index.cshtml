@@ -1,0 +1,121 @@
+@model ShopNest.Web.ViewModels.Customer.CustomerIndexViewModel
+@{
+    ViewData["Title"] = "Customer Management - BookStore Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="max-width: 1400px; margin: 0 auto; padding: 2rem 5%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <h1 style="font-size: 1.8rem; color: var(--primary); display: flex; align-items: center; gap: 0.75rem; font-weight: 800;">
+            <i class="fas fa-users"></i> Customer Management
+        </h1>
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <form method="get" class="search-form" asp-action="Index" style="display: flex; gap: 0.8rem; align-items: center;">
+                <div class="input-icon" style="position: relative; width: 260px;">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+                    <input type="text" name="searchTerm" placeholder="Search by name, email..." value="@Model.SearchTerm" style="width: 100%; padding: 0.65rem 1rem 0.65rem 2.5rem; border: 1.5px solid var(--border-color); border-radius: 50px; outline: none; font-size: 0.9rem;">
+                </div>
+                <button type="submit" class="btn-primary-sm" style="border-radius: 50px; padding: 0.65rem 1.2rem; font-weight: 700;">Search</button>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="background: rgba(45, 164, 78, 0.12); color: #2da44e; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(45, 164, 78, 0.15);">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+        </div>
+    }
+
+    <div style="background: white; border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); overflow: hidden;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: var(--primary-pale); display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--primary); margin: 0;">Registered Customers</h2>
+            <span class="badge" style="font-size: 0.85rem; padding: 0.35rem 0.8rem;">@Model.TotalCount Accounts</span>
+        </div>
+
+        <div style="padding: 1.5rem;">
+            @if (Model.Customers.Any())
+            {
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color);">
+                                <th style="padding: 1rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">Customer Name</th>
+                                <th style="padding: 1rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">Email Address</th>
+                                <th style="padding: 1rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">Phone</th>
+                                <th style="padding: 1rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">Orders Placed</th>
+                                <th style="padding: 1rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">Status</th>
+                                <th style="padding: 1rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cust in Model.Customers)
+                            {
+                                <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s;" onmouseover="this.style.background='#faf8f3'" onmouseout="this.style.background='white'">
+                                    <td style="padding: 1rem; font-weight: 700; color: var(--text-main);">
+                                        @cust.FullName
+                                    </td>
+                                    <td style="padding: 1rem; color: var(--text-muted);">
+                                        @cust.Email
+                                    </td>
+                                    <td style="padding: 1rem; color: var(--text-muted);">
+                                        @(string.IsNullOrEmpty(cust.Phone) ? "N/A" : cust.Phone)
+                                    </td>
+                                    <td style="padding: 1rem; font-weight: 700; color: var(--primary);">
+                                        <span class="badge" style="background: var(--primary-pale); color: var(--primary);">@cust.OrdersCount Orders</span>
+                                    </td>
+                                    <td style="padding: 1rem;">
+                                        @if (cust.IsActive)
+                                        {
+                                            <span style="background: rgba(45,164,78,0.12); color: #2da44e; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-check-circle"></i> Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="background: rgba(192,57,43,0.12); color: var(--error); padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 700;"><i class="fas fa-ban"></i> Suspended</span>
+                                        }
+                                    </td>
+                                    <td style="padding: 1rem; text-align: right;">
+                                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                            <a href="@Url.Action("Details", "Customer", new { id = cust.Id })" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--primary); background: white; transition: all 0.2s;" onmouseover="this.style.background='var(--primary-pale)'" onmouseout="this.style.background='white'" title="View Profile">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Addresses", "Customer", new { customerId = cust.Id })" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--accent); background: white; transition: all 0.2s;" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='white'" title="Saved Addresses">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div style="display: flex; justify-content: center; margin-top: 2rem;">
+                        <ul style="display: flex; list-style: none; gap: 0.5rem; padding: 0;">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="@(i == Model.CurrentPage ? "active" : "")">
+                                    <a href="@Url.Action("Index", new { searchTerm = Model.SearchTerm, page = i })"
+                                       style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: @(i == Model.CurrentPage ? "var(--primary)" : "white"); color: @(i == Model.CurrentPage ? "white" : "var(--text-muted)"); border: 1px solid var(--border-color); font-weight: 700; transition: var(--transition); text-decoration: none;">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                    <i class="fas fa-users-slash" style="font-size: 4.5rem; color: var(--primary-light); margin-bottom: 1.5rem; display: block;"></i>
+                    <h3 style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 0.5rem;">No Customers Found</h3>
+                    <p style="max-width: 500px; margin: 0 auto 1.5rem; font-size: 0.95rem;">There are no customer accounts matching your search inputs.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

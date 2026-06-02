@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ShpoNest.Models.Entities;
 using System;
@@ -39,6 +39,14 @@ namespace ShopNest.DAL.Configurations
             builder.Property(c => c.CreatedAt)
                 .IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
+
+            builder.Property(c => c.PasswordHash)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            builder.Property(c => c.IsAdmin)
+                .IsRequired()
+                .HasDefaultValue(false);
 
             // Relationships
             builder.HasMany(c => c.Addresses)

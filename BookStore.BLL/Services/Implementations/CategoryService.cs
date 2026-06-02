@@ -1,4 +1,4 @@
-﻿using ShopNest.BLL.DTOs.Category;
+using ShopNest.BLL.DTOs.Category;
 using ShopNest.BLL.Helper;
 using ShopNest.BLL.Helpers;
 using ShopNest.BLL.Services.Interfaces;
@@ -108,7 +108,11 @@ namespace ShopNest.BLL.Services.Implementations
                 Id = category.Id,
                 Name = category.Name,
                 Description = category.Description,
-                ImagePath = category.ImagePath,
+                ImagePath = category.ImagePath != null
+                    ? (category.ImagePath.StartsWith("/") || category.ImagePath.StartsWith("http")
+                        ? category.ImagePath
+                        : $"/Files/Categories/{category.ImagePath}")
+                    : null,
                 IsActive = category.IsActive,
                 ProductsCount = category.Products?.Count() ?? 0,
             };

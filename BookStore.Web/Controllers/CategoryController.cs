@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ShopNest.BLL.DTOs.Category;
 using ShopNest.BLL.Services.Interfaces;
 using ShopNest.Web.ViewModels.Category;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace ShopNest.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;

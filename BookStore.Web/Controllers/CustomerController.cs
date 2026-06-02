@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ShopNest.BLL.DTOs.Customer;
 using ShopNest.BLL.Services.Interfaces;
 using ShopNest.Web.ViewModels.Customer;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace ShopNest.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CustomerController : Controller
     {
         private readonly ICustomerService _customerService;

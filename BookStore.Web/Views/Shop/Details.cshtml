@@ -1,0 +1,495 @@
+@model ShopNest.BLL.DTOs.Product.ProductResultDto
+@{
+    ViewData["Title"] = $"{Model.Name} - BookStore Details";
+    var relatedBooks = ViewBag.RelatedBooks as List<ShopNest.BLL.DTOs.Product.ProductResultDto> ?? new List<ShopNest.BLL.DTOs.Product.ProductResultDto>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/books.css" />
+    <style>
+        .details-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            padding: 3rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Image gallery */
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .main-image-wrap {
+            height: 480px;
+            background: #faf8f3;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-image-wrap img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+            transition: var(--transition);
+        }
+
+        .thumbnails-grid {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .thumbnail-card {
+            width: 72px;
+            height: 72px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            padding: 4px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .thumbnail-card:hover, .thumbnail-card.active {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .thumbnail-card img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        /* Info column */
+        .info-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-category-tag {
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+        }
+
+        .book-title-h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.25;
+            margin-bottom: 0.6rem;
+        }
+
+        .book-author-p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .price-rating-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .detail-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .stock-badge.in-stock {
+            background: rgba(45, 164, 78, 0.12);
+            color: #2da44e;
+        }
+
+        .stock-badge.out-of-stock {
+            background: rgba(192, 57, 43, 0.12);
+            color: var(--error);
+        }
+
+        /* Purchase actions */
+        .purchase-actions {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            align-items: center;
+        }
+
+        .quantity-picker {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: white;
+        }
+
+        .qty-btn {
+            border: none;
+            background: none;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .qty-btn:hover {
+            background: var(--primary-pale);
+            color: var(--primary);
+        }
+
+        .qty-input {
+            width: 50px;
+            height: 44px;
+            border: none;
+            border-left: 1.5px solid var(--border-color);
+            border-right: 1.5px solid var(--border-color);
+            text-align: center;
+            outline: none;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .btn-gold-lg {
+            background: var(--accent);
+            color: white;
+            padding: 0 2rem;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            box-shadow: 0 4px 15px rgba(201, 150, 59, 0.2);
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-gold-lg:hover {
+            background: #b5802a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201, 150, 59, 0.3);
+        }
+
+        /* Description / Tabs */
+        .tabs-container {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        .section-h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .spec-table tr {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .spec-table td {
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .spec-table td.label-td {
+            font-weight: 700;
+            color: var(--text-muted);
+            width: 30%;
+            background: #faf8f3;
+        }
+
+        .spec-table td.val-td {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Responsive Details */
+        @@media (max-width: 900px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                padding: 2rem;
+            }
+            .main-image-wrap {
+                height: 380px;
+            }
+        }
+    </style>
+}
+
+<div class="details-container">
+    <div class="details-grid">
+        <!-- Gallery -->
+        <div class="gallery-container">
+            <div class="main-image-wrap">
+                <img id="mainBookImg" src="@(string.IsNullOrEmpty(Model.MainImagePath) ? "/images/default-book.png" : Model.MainImagePath)" 
+                     alt="@Model.Name" 
+                     onerror="this.src='/images/default-book.png'">
+            </div>
+            
+            @if (Model.Images != null && Model.Images.Count > 1)
+            {
+                <div class="thumbnails-grid">
+                    @foreach (var img in Model.Images)
+                    {
+                        <div class="thumbnail-card @(img.ImagePath == Model.MainImagePath ? "active" : "")" onclick="swapImage(this, '@img.ImagePath')">
+                            <img src="@img.ImagePath" alt="Thumbnail" onerror="this.src='/images/default-book.png'">
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Book Info -->
+        <div class="info-col">
+            <div class="book-category-tag">@Model.CategoryName</div>
+            <h1 class="book-title-h1">@Model.Name</h1>
+            <p class="book-author-p">by @(Model.Author ?? "Unknown Author")</p>
+
+            <div class="price-rating-row">
+                <div class="detail-price">EGP @Model.Price.ToString("N0")</div>
+                <div>
+                    @if (Model.Stock > 0)
+                    {
+                        <span class="stock-badge in-stock"><i class="fas fa-check-circle"></i> @Model.Stock in stock</span>
+                    }
+                    else
+                    {
+                        <span class="stock-badge out-of-stock"><i class="fas fa-times-circle"></i> Out of stock</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div style="margin-bottom: 2rem;">
+                <h3 class="section-h3"><i class="fas fa-info-circle"></i> Overview</h3>
+                <p style="color: var(--text-muted); font-size: 0.98rem; line-height: 1.7; white-space: pre-line;">
+                    @(string.IsNullOrEmpty(Model.Description) ? "No description available for this technical literature." : Model.Description)
+                </p>
+            </div>
+
+            <!-- Add to Cart Action -->
+            <div class="purchase-actions">
+                @if (Model.Stock > 0)
+                {
+                    <div class="quantity-picker">
+                        <button type="button" class="qty-btn" onclick="updateQty(-1)">-</button>
+                        <input type="text" id="qtyInput" class="qty-input" value="1" readonly>
+                        <button type="button" class="qty-btn" onclick="updateQty(1)">+</button>
+                    </div>
+                    <button type="button" class="btn-gold-lg" onclick="triggerAddToCart()">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn-gold-lg" style="background: var(--text-dim); cursor: not-allowed; box-shadow: none;" disabled>
+                        Unavailable
+                    </button>
+                }
+            </div>
+
+            <!-- Technical Specifications -->
+            <div class="tabs-container">
+                <h3 class="section-h3"><i class="fas fa-microchip"></i> Book Specifications</h3>
+                <table class="spec-table">
+                    <tbody>
+                        <tr>
+                            <td class="label-td">ISBN-13</td>
+                            <td class="val-td">@(Model.ISBN ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">Format</td>
+                            <td class="val-td">@Model.Format.ToString()</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">Language</td>
+                            <td class="val-td">@(Model.Language ?? "English")</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">Pages</td>
+                            <td class="val-td">@(Model.Pages.HasValue ? Model.Pages.Value.ToString() : "N/A") pages</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">Publisher</td>
+                            <td class="val-td">@(Model.Publisher ?? "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">Publication Year</td>
+                            <td class="val-td">@(Model.PublicationYear.HasValue ? Model.PublicationYear.Value.ToString() : "N/A")</td>
+                        </tr>
+                        <tr>
+                            <td class="label-td">Edition</td>
+                            <td class="val-td">@(string.IsNullOrEmpty(Model.Edition) ? "1st Edition" : Model.Edition)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Books -->
+    @if (relatedBooks.Any())
+    {
+        <div style="margin-top: 5rem;">
+            <h3 class="section-h3" style="font-size: 1.6rem; margin-bottom: 2rem;"><i class="fas fa-sparkles"></i> You Might Also Like</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2rem;">
+                @foreach (var book in relatedBooks)
+                {
+                    <div class="book-card" style="margin: 0; background: white; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); border-radius: var(--radius-md); overflow: hidden;">
+                        <div class="book-cover-wrap" style="height: 280px; overflow: hidden; background: #faf8f3; display: flex; align-items: center; justify-content: center; position: relative;">
+                            <img src="@(string.IsNullOrEmpty(book.MainImagePath) ? "/images/default-book.png" : book.MainImagePath)" 
+                                 alt="@book.Name" 
+                                 style="max-height: 85%; max-width: 80%; object-fit: contain; box-shadow: 0 6px 12px rgba(0,0,0,0.12);"
+                                 onerror="this.src='/images/default-book.png'">
+                            <div class="book-actions">
+                                <a href="@Url.Action("Details", "Shop", new { id = book.Id })" class="action-btn view-btn" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="action-btn cart-btn" title="Add to Cart" data-book-id="@book.Id">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div style="padding: 1rem;">
+                            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@book.Name</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">by @(book.Author ?? "Unknown")</p>
+                            <span style="font-weight: 800; color: var(--primary); font-size: 1rem;">EGP @book.Price.ToString("N0")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function swapImage(card, path) {
+            document.querySelectorAll('.thumbnail-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            
+            const mainImg = document.getElementById('mainBookImg');
+            mainImg.style.opacity = 0;
+            setTimeout(() => {
+                mainImg.src = path;
+                mainImg.style.opacity = 1;
+            }, 150);
+        }
+
+        function updateQty(change) {
+            const qtyInput = document.getElementById('qtyInput');
+            let currentVal = parseInt(qtyInput.value);
+            currentVal += change;
+            if (currentVal < 1) currentVal = 1;
+            if (currentVal > @Model.Stock) currentVal = @Model.Stock;
+            qtyInput.value = currentVal;
+        }
+
+        function triggerAddToCart() {
+            const qty = parseInt(document.getElementById('qtyInput').value);
+            fetch(`/Cart/Add/@Model.Id?qty=${qty}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`${qty} book(s) added to cart successfully! 🛒`);
+                    // Update badges
+                    document.querySelectorAll('.btn-icon .badge').forEach(badge => {
+                        badge.textContent = data.cartCount;
+                    });
+                } else {
+                    showToast('Failed to add: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast(`Added ${qty} item(s) to cart! 🛒`);
+            });
+        }
+
+        function showToast(message) {
+            let toast = document.getElementById('toast-notification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.className = 'toast-notification';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+}

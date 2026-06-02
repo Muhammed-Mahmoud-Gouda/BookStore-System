@@ -1,4 +1,4 @@
-﻿using ShopNest.BLL.Validators;
+using ShopNest.BLL.Validators;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShopNest.BLL.DTOs.Customer
@@ -23,5 +23,11 @@ namespace ShopNest.BLL.DTOs.Customer
         public string? Phone { get; set; }
 
         public bool IsActive { get; set; }
+
+        public bool IsAdmin { get; set; }
+
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
+        [DataType(DataType.Password)]
+        public string? Password { get; set; }
     }
 }
